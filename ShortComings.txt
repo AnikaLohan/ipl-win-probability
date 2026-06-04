@@ -1,0 +1,65 @@
+1. Super Overs — Ignored
+What it is: When a match ends in a tie, a 1-over eliminator (Super Over) is played. Some matches have had Super Over ties too, leading to a second Super Over.
+What we did: Our parser loops through match['innings'] normally. A Super Over appears as a 3rd or 4th innings in the JSON. We process it like a normal innings — which is wrong because:
+
+It only has 6 balls, not 120
+balls_remaining = 120 - legal_ball would be completely wrong
+The target logic breaks entirely
+
+Why we ignored it: Super Overs are very rare — maybe 15-20 matches across all IPL history. Including them wrongly would hurt the model more than excluding them.
+What we should do later: Add a filter to drop any innings where inning_idx > 1.
+
+2. DLS Method (Rain) — Ignored
+What it is: When rain interrupts a match, the target gets revised using the Duckworth-Lewis-Stern mathematical formula. A team might only need 140 off 15 overs instead of the original 180 off 20.
+What we did: We just use whatever target is stored in the JSON — which IS the revised DLS target. So the target number itself is correct.
+What we ignored: The balls_remaining is now wrong. In a DLS match the 2nd innings might only have 90 legal balls, not 120. Our formula balls_remaining = 120 - legal_ball assumes a full 20 overs always.
+Why we ignored it: DLS matches are maybe 5-8% of all IPL games. The model will learn slightly wrong pressure features for these matches but it won't break anything badly.
+What we should do later: Check if total overs in the innings is less than 20 and adjust balls_remaining accordingly.
+
+3. Retired Hurt — Partially Ignored
+What it is: A batter can leave the field injured (retired hurt) and come back later. This is NOT a wicket — the team doesn't lose a wicket, the batter just temporarily leaves.
+What we did: We count wickets using delivery.get('wickets', []). Retired hurt sometimes appears in this list with kind: retired hurt.
+What we assumed: We count it as a wicket, which is technically wrong. The team still has that batter available to return.
+Why it barely matters: Retired hurt happens maybe 2-3 times per entire IPL season. The effect on model accuracy is negligible.
+
+4. Batting Team Identity — Ignored
+What we did: We record batting_team and bowling_team as text strings but we do NOT use team identity as a model feature.
+What we ignored: Mumbai Indians win far more than Pune Warriors. Team quality matters enormously for win probability.
+Why we ignored it: Two reasons. First, teams change completely every few years due to auctions — MI 2023 is very different from MI 2015 in terms of players. Second, we didn't want to encode team names as features in this first version because it adds complexity (you'd need to one-hot encode 10+ team names).
+What we should do later: Add team win rate as a rolling feature (MI's win rate in last 20 games) rather than using raw team name.
+
+5. Player Identity — Ignored
+What we did: We don't use batter names, bowler names, or fielder names anywhere.
+What we ignored: Having Jasprit Bumrah bowling in the death overs vs a part-time bowler makes a massive difference to win probability. Having Virat Kohli at the crease vs a number 9 batter makes a massive difference.
+Why we ignored it: Player-level features are very hard to engineer correctly because:
+
+Players get injured, retire, go through form changes
+A player's stats from 2012 aren't relevant to predicting 2023 matches
+You'd need rolling form metrics, not career averages
+It's a separate project in itself
+
+This is actually a great thing to mention in interviews — "I consciously excluded player identity in v1 and have a plan for v2."
+
+6. Venue — Recorded but Not Used Yet
+What we did: We store venue and city in every row.
+What we ignored: Pitches vary enormously. Wankhede in Mumbai is a batting paradise — average first innings score is 170+. Chepauk in Chennai is a spinner's paradise — teams regularly defend 150.
+Why we haven't used it yet: We'll encode venue as a feature in the feature engineering step. It's not ignored permanently, just not built yet.
+
+7. Toss Decision Logic — Partially Wrong
+What we stored: toss_advantage = 1 if batting team won toss, else 0
+What we assumed: That winning the toss is always an advantage.
+What's actually true: In some venues teams prefer to field first (chase is easier). In others they prefer to bat. The advantage depends on the venue and the toss decision combined — not just who won.
+What we should do later: Create a feature like toss_and_decision_match — 1 if the batting team won the toss AND chose to bat, or lost the toss and was put in to bat and is doing well.
+
+8. Powerplay Fielding Restrictions — Ignored
+What it is: In overs 1-6, only 2 fielders are allowed outside the 30-yard circle. This artificially inflates scoring in the powerplay.
+What we did: We have a phase feature (powerplay, middle, death) which partially captures this.
+What we ignored: The exact fielding restriction rules and how they change scoring patterns. Our model will learn this implicitly from the data but we haven't explicitly told it.
+
+9. Second Innings Target Assumed Always Present — Bug Risk
+What we did:
+pythonif 'target' in inning:
+    target = inning['target']['runs']
+What we assumed: That every 2nd innings has a target stored in the JSON.
+What can go wrong: Very old Cricsheet files (2008-2010) sometimes don't have the target field. In that case target stays None for the entire 2nd innings — which means runs_required and required_run_rate will both be wrong (they'll calculate as None or crash).
+What we should do: Calculate target ourselves as innings_1_total + 1 when the JSON target is missing.
