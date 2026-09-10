@@ -134,11 +134,11 @@ Raw delivery data is not enough for a model. We engineer features that capture t
 **Algorithm: LightGBM (Gradient Boosting)**
 
 Why LightGBM and not simpler models:
-- Logistic Regression assumes all features affect the outcome equally and linearly — not true in cricket
+- Logistic Regression assumes all features affect the outcome equally and linearly  not true in cricket
 - A wicket in over 18 is catastrophic; a wicket in over 2 is recoverable. LightGBM learns this automatically
 - LightGBM trains in seconds even on 250,000 rows
 
-**Train/Validation/Test Split — by season, not randomly:**
+**Train/Validation/Test Split by season, not randomly:**
 
 | Split | Seasons | Why |
 |-------|---------|-----|
@@ -228,8 +228,8 @@ tqdm==4.66.1
 - [x] Model Accuracy: 68.22%
 - [x] Most important feature: current_run_rate
 - [x] Top 4 features are all chase-related (2nd innings)
-- [x] Toss advantage has moderate impact — less than run rate but more than match phase
-- [x] Phase and balls_remaining have near zero importance — model gets this from required_run_rate already
+- [x] Toss advantage has moderate impact less than run rate but more than match phase
+- [x] Phase and balls_remaining have near zero importance  model gets this from required_run_rate already
 
 ---
 
