@@ -250,8 +250,8 @@ tqdm==4.66.1
 ## Author
 
 **Anika**
-Built as part of a 6-project ML/AI portfolio targeting Data Science and AI/ML roles.
-Other projects in the portfolio: Delhi AQI Forecaster, NCRB Crime Atlas, RBI Sentiment Analyzer, India Disease Early Warning System, Hinglish NLP Analyzer.
+Built as part of a project ML/AI portfolio targeting Data Science and AI/ML roles.
+
 
 ---
 
