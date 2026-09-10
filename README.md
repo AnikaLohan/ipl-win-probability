@@ -4,9 +4,9 @@
 
 ## What This Project Does
 
-This project predicts the probability of a team winning an IPL match — updated after **every single ball bowled**.
+This project predicts the probability of a team winning an IPL match updated after **every single ball bowled**.
 
-For example: Mumbai Indians are chasing 180. It's over 15. They need 52 runs off 30 balls with 4 wickets in hand. What's their exact probability of winning? This model answers that — and updates the answer on every delivery.
+For example: Mumbai Indians are chasing 180. It's over 15. They need 52 runs off 30 balls with 4 wickets in hand. What's their exact probability of winning? This model answers that and updates the answer on every delivery.
 
 ---
 
@@ -15,9 +15,9 @@ For example: Mumbai Indians are chasing 180. It's over 15. They need 52 runs off
 Most IPL projects on the internet do basic analysis — top scorers, team win rates, average scores by venue. This project is different:
 
 - It works at the **ball-by-ball level**, not match level
-- It models **game state** (wickets, run rate, phase of play) — not just historical averages
+- It models **game state** (wickets, run rate, phase of play) not just historical averages
 - It uses **LightGBM** which captures non-linear relationships (e.g. losing a wicket in over 18 matters far more than in over 2)
-- The model is **calibrated** — a prediction of 70% actually means the team wins 70% of the time
+- The model is **calibrated** a prediction of 70% actually means the team wins 70% of the time
 - It is deployed as a **live Streamlit app** where you can input any match state and get an instant prediction
 
 ---
